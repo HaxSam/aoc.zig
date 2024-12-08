@@ -100,29 +100,20 @@ pub fn part2(self: *Self, input: InputType) !?u128 {
 
     while (iter.next()) |radio| {
         for (radio.items, 1..) |antenna1, i| {
+            antinodes.put(antenna1, {}) catch {};
             for (radio.items[i..]) |antenna2| {
                 const diff = antenna2 - antenna1;
+                var antinode1 = antenna1 - diff;
+                var antinode2 = antenna2 + diff;
+                antinodes.put(antenna2, {}) catch {};
 
-                var antinode11 = antenna1 - diff;
-                var antinode12 = antenna1 + diff;
-                var antinode21 = antenna2 + diff;
-                var antinode22 = antenna2 - diff;
-
-                while (@reduce(.And, antinode11 >= limit1) and @reduce(.And, antinode11 < limit2)) {
-                    antinodes.put(antinode11, {}) catch {};
-                    antinode11 -= diff;
+                while (@reduce(.And, antinode1 >= limit1) and @reduce(.And, antinode1 < limit2)) {
+                    antinodes.put(antinode1, {}) catch {};
+                    antinode1 -= diff;
                 }
-                while (@reduce(.And, antinode12 >= limit1) and @reduce(.And, antinode12 < limit2)) {
-                    antinodes.put(antinode12, {}) catch {};
-                    antinode12 += diff;
-                }
-                while (@reduce(.And, antinode21 >= limit1) and @reduce(.And, antinode21 < limit2)) {
-                    antinodes.put(antinode21, {}) catch {};
-                    antinode21 += diff;
-                }
-                while (@reduce(.And, antinode22 >= limit1) and @reduce(.And, antinode22 < limit2)) {
-                    antinodes.put(antinode22, {}) catch {};
-                    antinode22 -= diff;
+                while (@reduce(.And, antinode2 >= limit1) and @reduce(.And, antinode2 < limit2)) {
+                    antinodes.put(antinode2, {}) catch {};
+                    antinode2 += diff;
                 }
             }
         }
