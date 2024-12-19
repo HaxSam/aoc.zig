@@ -1,6 +1,7 @@
-//! https://adventofcode.com/2024/day/2
+//! https://adventofcode.com/0xC0FE/day/0xBEEF
 
 const std = @import("std");
+const buildtin = @import("builtin");
 const utils = @import("utils");
 
 arena: std.heap.ArenaAllocator,
@@ -8,18 +9,36 @@ input: []const u8,
 
 const Self = @This();
 
-pub const DAY = 2;
-pub const YEAR = 2024;
+pub const DAY = 0xBEEF;
+pub const YEAR = 0xC0FE;
+pub const INPUT = @embedFile("input");
 
-pub fn init(allocator: std.mem.Allocator, input: []const u8) Self {
+pub fn init(allocator: std.mem.Allocator, input: ?[]const u8) Self {
     return Self{
         .arena = std.heap.ArenaAllocator.init(allocator),
-        .input = input,
+        .input = input orelse INPUT,
     };
 }
 
 pub fn deinit(self: *const Self) void {
     self.arena.deinit();
+}
+
+pub fn main() !void {
+    const allocator = std.heap.page_allocator;
+    const stdout = std.io.getStdOut().writer();
+
+    var solve = Self.init(allocator, null);
+    defer solve.deinit();
+
+    const processed_input = try solve.processInput();
+    const part1_result = try solve.part1(processed_input);
+    const part2_result = try solve.part2(processed_input);
+
+    try stdout.print("0xC0FE/0xBEEF:\n- Part 1: {?}\n- Part 2: {?} \n", .{
+        part1_result,
+        part2_result,
+    });
 }
 
 //////////////////////////////////////////////////
@@ -36,9 +55,9 @@ pub const InputType = struct {
 pub fn processInput(self: *Self) !InputType {
     var allocator = self.arena.allocator();
 
-    const line_count = std.mem.count(u8, self.input, "\n");
+    const line_count = std.mem.count(u8, INPUT, "\n");
+    var split = std.mem.tokenizeSequence(u8, INPUT, "\n");
     const lines = try allocator.alloc([]const u8, line_count);
-    var split = std.mem.tokenizeSequence(u8, self.input, "\n");
 
     for (lines) |*l| {
         l.* = split.next().?;
@@ -62,7 +81,9 @@ pub fn part2(self: *Self, input: InputType) !?u128 {
     return null;
 }
 
-test "Test input for 2024/2" {
+// Test your solution here
+const testing = std.testing;
+test "Test input for 0xC0FE/0xBEEF" {
     const allocator = std.testing.allocator;
     const input =
         \\
@@ -73,6 +94,6 @@ test "Test input for 2024/2" {
 
     const processed_input = try problem.processInput();
 
-    try std.testing.expectEqual(null, try problem.part1(processed_input));
-    try std.testing.expectEqual(null, try problem.part2(processed_input));
+    try testing.expectEqual(null, try problem.part1(processed_input));
+    try testing.expectEqual(null, try problem.part2(processed_input));
 }

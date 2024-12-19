@@ -2,6 +2,9 @@
     .name = "aoc.zig",
     .version = "0.0.0",
     .dependencies = .{
+        .utils = .{
+            .path = "lib/utils",
+        },
         .zbench = .{
             .url = "git+https://github.com/hendriknielaender/zBench#06274a13db6d40e930a7e7d1c1a03a86b72a35ed",
             .hash = "122095b73930ff5d627429295c669905d85bb9b54394ddc185ad2d61295cc65819e5",
@@ -12,5 +15,6 @@
         "build.zig.zon",
         "template.zig",
         "src",
+        "lib",
     },
 }

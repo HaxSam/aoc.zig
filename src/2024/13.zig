@@ -1,6 +1,7 @@
 //! https://adventofcode.com/2024/day/13
 
 const std = @import("std");
+const buildtin = @import("builtin");
 const utils = @import("utils");
 
 arena: std.heap.ArenaAllocator,
@@ -8,18 +9,38 @@ input: []const u8,
 
 const Self = @This();
 
-pub const DAY = 13;
+pub const DAY = 10;
 pub const YEAR = 2024;
+pub const INPUT = @embedFile("input");
 
-pub fn init(allocator: std.mem.Allocator, input: []const u8) Self {
+pub fn init(allocator: std.mem.Allocator, input: ?[]const u8) Self {
     return Self{
         .arena = std.heap.ArenaAllocator.init(allocator),
-        .input = input,
+        .input = input orelse INPUT,
     };
 }
 
 pub fn deinit(self: *const Self) void {
     self.arena.deinit();
+}
+
+pub fn main() !void {
+    const allocator = std.heap.page_allocator;
+    const stdout = std.io.getStdOut().writer();
+
+    var solve = Self.init(allocator, null);
+    defer solve.deinit();
+
+    const processed_input = try solve.processInput();
+    const part1_result = try solve.part1(processed_input);
+    const part2_result = try solve.part2(processed_input);
+
+    try stdout.print("{d}/{d}:\n- Part 1: {?}\n- Part 2: {?} \n", .{
+        YEAR,
+        DAY,
+        part1_result,
+        part2_result,
+    });
 }
 
 //////////////////////////////////////////////////
