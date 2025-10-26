@@ -1,5 +1,6 @@
 .{
-    .name = "utils",
+    .name = .utils,
+    .fingerprint = 0x540f5beb560e9367,
     .version = "0.0.0",
     .dependencies = .{},
 
