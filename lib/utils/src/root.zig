@@ -1,4 +1,5 @@
 const std = @import("std");
+pub const Alloc = @import("Alloc.zig");
 
 pub fn parseInt(comptime T: type, buf: []const u8) !T {
     return std.fmt.parseInt(T, buf, 10);

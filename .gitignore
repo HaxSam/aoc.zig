@@ -1,3 +1,4 @@
 .zig-cache
 .session
 src/*/input
+zig-out
