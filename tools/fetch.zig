@@ -50,6 +50,7 @@ fn fetchInput(allocator: Allocator, year: u16, day: u8, input_path: []const u8, 
     const res = try client.fetch(.{
         .location = .{ .url = url },
         .method = .GET,
+        .headers = .{ .user_agent = .{ .override = "aoc.zig/0.1.0 developer: haxsam@pm.me" } },
         .extra_headers = &[_]std.http.Header{.{ .name = "Cookie", .value = cookie }},
         .response_writer = &input_writer.interface,
     });

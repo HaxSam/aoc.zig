@@ -41,6 +41,7 @@ fn submitPart(allocator: Allocator, part: u8, answer: u128, year: u16, day: u8, 
     const res = try client.fetch(.{
         .location = .{ .url = url },
         .method = .POST,
+        .headers = .{ .user_agent = .{ .override = "aoc.zig/0.1.0 developer: haxsam@pm.me" } },
         .extra_headers = &[_]std.http.Header{
             .{ .name = "Cookie", .value = cookie },
             .{ .name = "Content-Type", .value = "application/x-www-form-urlencoded" },

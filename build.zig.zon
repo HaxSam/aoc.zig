@@ -1,6 +1,6 @@
 .{
     .name = .aoc_zig,
-    .version = "0.0.0",
+    .version = "0.1.0",
     .fingerprint = 0x3a7cfe5a680b465e,
     .dependencies = .{ .utils = .{
         .path = "lib/utils",

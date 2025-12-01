@@ -6,6 +6,7 @@ pub const fetch = @import("fetch.zig");
 pub const Context = @import("Context.zig");
 pub const post = @import("post.zig");
 pub const submit = @import("submit.zig");
+pub const steps = @import("steps.zig");
 
 const ContextAlloc = @import("ContextAlloc.zig");
 

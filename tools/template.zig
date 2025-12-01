@@ -19,15 +19,16 @@ pub const INPUT = @embedFile("input");
 ///////////////// have fun ///////////////////////
 //////////////////////////////////////////////////
 
-pub const InputType = []const u8;
+pub const Input = []const u8;
+pub const InputType = []Input;
 
 // Advent of Parsing~
-pub fn processInput(self: *Self) ![]InputType {
+pub fn processInput(self: *Self) !InputType {
     var allocator = self.arena.allocator();
 
     const line_count = std.mem.count(u8, self.input, "\n");
     var split = std.mem.tokenizeSequence(u8, self.input, "\n");
-    const lines = try allocator.alloc(InputType, line_count);
+    const lines = try allocator.alloc(Input, line_count);
 
     for (lines) |*l| {
         l.* = split.next().?;
@@ -83,7 +84,7 @@ pub fn main() !void {
     const part1_result = try solve.part1(processed_input);
     const part2_result = try solve.part2(processed_input);
 
-    try stdout.print("0xC0FE/00xBEEF:\n- Part 1: {?}\n- Part 2: {?} \n", .{
+    try stdout.print("0xC0FE/00xBEEF:\n- Part 1: {?}\n- Part 2: {?}\n", .{
         part1_result,
         part2_result,
     });

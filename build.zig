@@ -2,6 +2,7 @@ const std = @import("std");
 const utils = @import("tools/root.zig");
 
 const Context = utils.Context;
+const steps = utils.steps;
 const YearDay = Context.YearDay;
 
 pub fn build(b: *std.Build) !void {
@@ -9,6 +10,7 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const date = utils.DateTime.now();
     const year = b.option(u16, "year", "The year to run aoc in") orelse date.year;
+    const part = b.option(u8, "part", "Part to run aoc in") orelse 1;
 
     const utils_mod = b.dependency("utils", .{
         .target = target,
@@ -36,10 +38,14 @@ pub fn build(b: *std.Build) !void {
     inline for (1..26) |day| {
         const yearday: YearDay = .init(year, day);
         const src = b.fmt("src/{s}/{s}.zig", .{ yearday.year_str, yearday.day_str });
+        const src_dir = src[0..8];
 
-        const steps: StepBuilder = .init(b, aoc, yearday, src);
-
-        const input_mod = b.createModule(.{ .root_source_file = b.path(b.fmt("src/{s}/input/{s}.txt", .{ yearday.year_str, yearday.day_str })) });
+        const input_mod = b.createModule(.{
+            .root_source_file = b.path(b.fmt("src/{s}/input/{s}.txt", .{
+                yearday.year_str,
+                yearday.day_str,
+            })),
+        });
 
         const solve_mod = b.createModule(.{
             .root_source_file = b.path(src),
@@ -61,22 +67,21 @@ pub fn build(b: *std.Build) !void {
         const solve_exe = b.addRunArtifact(solve);
         const solve_test_exe = b.addRunArtifact(solve_test);
 
-        const submit_mod = b.createModule(.{
-            .root_source_file = b.path("tools/submit.zig"),
-            .target = target,
-            .optimize = .ReleaseFast,
-        });
-        submit_mod.addImport("solve", solve_mod);
+        const gen: *steps.GenerateContex = .init(b, aoc, yearday, src_dir);
+        defer gen.deinit();
 
-        const submit = b.addExecutable(.{
-            .name = b.fmt("submit: {s}|{s}", .{ yearday.year_str, yearday.day_str }),
-            .root_module = submit_mod,
-        });
-        const submit_exe = b.addRunArtifact(submit);
+        const fetch: *steps.FetchContex = .init(b, aoc, yearday, b.fmt("{s}/input", .{src_dir}));
+        defer fetch.deinit();
+
+        const submit: *steps.SubmitContex = .init(b, aoc, yearday, part, solve_exe.captureStdOut());
+        defer submit.deinit();
+
+        const post: *steps.PostContex = .init(b, aoc, src);
+        defer post.deinit();
 
         const gen_step = b.step(b.fmt("gen:{d}", .{day}), "");
-        gen_step.dependOn(steps.fetch_step);
-        gen_step.dependOn(steps.generate_step);
+        gen_step.dependOn(&gen.tool.step);
+        gen_step.dependOn(&fetch.tool.step);
 
         const test_step = b.step(b.fmt("test:{d}", .{day}), "");
         test_step.dependOn(&solve_test_exe.step);
@@ -85,10 +90,10 @@ pub fn build(b: *std.Build) !void {
         run_step.dependOn(&solve_exe.step);
 
         const submit_step = b.step(b.fmt("submit:{d}", .{day}), "");
-        submit_step.dependOn(&submit_exe.step);
+        submit_step.dependOn(&submit.tool.step);
 
         const post_step = b.step(b.fmt("post:{d}", .{day}), "");
-        post_step.dependOn(steps.post_step);
+        post_step.dependOn(&post.tool.step);
 
         if (day == date.day) {
             gen_today_step.dependOn(gen_step);
@@ -99,48 +104,3 @@ pub fn build(b: *std.Build) !void {
         }
     }
 }
-
-const StepBuilder = struct {
-    const Step = std.Build.Step;
-    const Compile = Step.Compile;
-    const Run = Step.Run;
-    const Self = @This();
-
-    fetch_step: *Step,
-    generate_step: *Step,
-    post_step: *Step,
-
-    pub fn init(b: *std.Build, aoc: *Compile, yearday: YearDay, path: []const u8) Self {
-        return .{
-            .fetch_step = fetch(b.addRunArtifact(aoc), yearday, b.fmt("{s}/input", .{path[0..8]})),
-            .generate_step = generate(b.addRunArtifact(aoc), yearday, path[0..8]),
-            .post_step = post(b.addRunArtifact(aoc), path),
-        };
-    }
-
-    fn fetch(tool: *Run, yearday: YearDay, path: ?[]const u8) *Step {
-        tool.addArg("fetch");
-        tool.addArg(&yearday.year_str);
-        tool.addArg(&yearday.day_str);
-        if (path) |p| {
-            tool.addArg(p);
-        }
-        return &tool.step;
-    }
-
-    fn generate(tool: *Run, yearday: YearDay, path: ?[]const u8) *Step {
-        tool.addArg("generate");
-        tool.addArg(&yearday.year_str);
-        tool.addArg(&yearday.day_str);
-        if (path) |p| {
-            tool.addArg(p);
-        }
-        return &tool.step;
-    }
-
-    fn post(tool: *Run, path: []const u8) *Step {
-        tool.addArg("post");
-        tool.addArg(path);
-        return &tool.step;
-    }
-};
