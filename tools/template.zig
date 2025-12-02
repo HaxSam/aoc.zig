@@ -11,7 +11,7 @@ const Self = @This();
 
 pub const DAY = 0xBEEF;
 pub const YEAR = 0xC0FE;
-pub const INPUT = @embedFile("input");
+pub const INPUT_FILE = @embedFile("input");
 
 //////////////////////////////////////////////////
 //////////////// Solve here //////////////////////
@@ -19,16 +19,20 @@ pub const INPUT = @embedFile("input");
 ///////////////// have fun ///////////////////////
 //////////////////////////////////////////////////
 
-pub const Input = []const u8;
-pub const InputType = []Input;
+pub const InputType = []const u8;
+pub const Input = []InputType;
 
 // Advent of Parsing~
-pub fn processInput(self: *Self) !InputType {
+pub fn processInput(self: *Self) !Input {
     var allocator = self.arena.allocator();
 
-    const line_count = std.mem.count(u8, self.input, "\n");
-    var split = std.mem.tokenizeSequence(u8, self.input, "\n");
-    const lines = try allocator.alloc(Input, line_count);
+    const end = std.mem.lastIndexOfScalar(u8, self.input, '\n').?;
+    self.input = self.input[0..end];
+
+    const split_on = "\n";
+    const line_count = std.mem.count(u8, self.input, split_on) + 1;
+    var split = std.mem.tokenizeSequence(u8, self.input, split_on);
+    const lines = try allocator.alloc(InputType, line_count);
 
     for (lines) |*l| {
         l.* = split.next().?;
@@ -38,13 +42,13 @@ pub fn processInput(self: *Self) !InputType {
 }
 
 // Advent of Code (Time to solve fr)
-pub fn part1(self: *Self, input: InputType) !?u128 {
+pub fn part1(self: *Self, input: Input) !?u128 {
     _ = self.arena.allocator();
     _ = input;
     return null;
 }
 
-pub fn part2(self: *Self, input: InputType) !?u128 {
+pub fn part2(self: *Self, input: Input) !?u128 {
     _ = self.arena.allocator();
     _ = input;
     return null;
@@ -59,7 +63,7 @@ pub fn part2(self: *Self, input: InputType) !?u128 {
 pub fn init(allocator: std.mem.Allocator, input: ?[]const u8) Self {
     return Self{
         .arena = std.heap.ArenaAllocator.init(allocator),
-        .input = input orelse INPUT,
+        .input = input orelse INPUT_FILE,
     };
 }
 
@@ -68,27 +72,7 @@ pub fn deinit(self: *const Self) void {
 }
 
 pub fn main() !void {
-    const alloc: utils.Alloc = .init();
-    defer alloc.deinit();
-
-    const allocator = alloc.allocator;
-
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-    const stdout = &stdout_writer.interface;
-
-    var solve = Self.init(allocator, null);
-    defer solve.deinit();
-
-    const processed_input = try solve.processInput();
-    const part1_result = try solve.part1(processed_input);
-    const part2_result = try solve.part2(processed_input);
-
-    try stdout.print("0xC0FE/00xBEEF:\n- Part 1: {?}\n- Part 2: {?}\n", .{
-        part1_result,
-        part2_result,
-    });
-    try stdout.flush();
+    try utils.runMain(Self);
 }
 
 // Test your solution here

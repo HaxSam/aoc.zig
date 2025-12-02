@@ -116,14 +116,14 @@ pub const SubmitContex = struct {
 
     step: Step,
 
-    pub fn init(b: *std.Build, tool: *Step.Compile, yearday: YearDay, part: u8, solution: std.Build.LazyPath) *Self {
+    pub fn init(b: *std.Build, tool: *Step.Compile, yearday: YearDay, part: u8, solution: *Run) *Self {
         const ctx = b.allocator.create(@This()) catch unreachable;
         ctx.* = .{
             .b = b,
             .tool = b.addRunArtifact(tool),
             .yearday = yearday,
             .part = part,
-            .solve = solution,
+            .solve = solution.captureStdOut(),
             .step = Step.init(.{
                 .id = .custom,
                 .name = b.fmt("submit|{d} {s}|{s}", .{ part, yearday.year_str, yearday.day_str }),
@@ -132,8 +132,10 @@ pub const SubmitContex = struct {
             }),
         };
 
+        solution.addArg(b.fmt("{d}", .{part}));
+
         ctx.tool.step.dependOn(&ctx.step);
-        ctx.step.dependOn(solution.generated.file.step);
+        ctx.step.dependOn(ctx.solve.generated.file.step);
 
         return ctx;
     }
@@ -156,19 +158,7 @@ pub const SubmitContex = struct {
         var file_buf: [1024]u8 = undefined;
         const file = std.fs.cwd().readFile(self.solve.generated.file.getPath(), &file_buf) catch @panic("OOM");
 
-        var lines = std.mem.tokenizeSequence(u8, file, "\n");
-        _ = lines.next().?;
-
-        const p1 = lines.next().?;
-        const p2 = lines.next().?;
-
-        if (self.part < 1 or self.part > 2) {
-            @panic("There is no Part 0/3");
-        }
-        const p = if (self.part == 1) p1 else p2;
-
-        var token = std.mem.splitBackwardsScalar(u8, p, ' ');
-        tool.addArg(token.first());
+        tool.addArg(file);
     }
 };
 
