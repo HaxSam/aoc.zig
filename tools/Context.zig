@@ -20,11 +20,7 @@ pub const YearDay = struct {
         var ret: YearDay = .{ .year = year, .day = day };
 
         _ = std.fmt.printInt(&ret.year_str, year, 10, .lower, .{});
-        _ = std.fmt.printInt(&ret.day_str, day, 10, .lower, .{ .width = 2 });
-
-        if (ret.day_str[0] == ' ') {
-            ret.day_str[0] = '0';
-        }
+        _ = std.fmt.printInt(&ret.day_str, day, 10, .lower, .{ .width = 2, .fill = '0' });
 
         return ret;
     }

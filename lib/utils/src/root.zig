@@ -20,14 +20,30 @@ pub fn runMain(Solver: type) !void {
     const processed_input = try solve.processInput();
 
     if (args.len > 1) {
+        if (args[1][0] == '0') {
+            try stdout.print("{d}/{d:02}:\n", .{
+                Solver.YEAR,
+                Solver.DAY,
+            });
+        }
         if (args[1][0] == '1') {
             try stdout.print("{?}", .{try solve.part1(processed_input)});
         }
         if (args[1][0] == '2') {
             try stdout.print("{?}", .{try solve.part2(processed_input)});
         }
+        if (args[1][0] == '3') {
+            try stdout.print("{d}/{d:02}:\n- Part 1: {?}\n- Part 2: {?}\n\n", .{
+                Solver.YEAR,
+                Solver.DAY,
+                try solve.part1(processed_input),
+                try solve.part2(processed_input),
+            });
+        }
     } else {
-        try stdout.print("2025/02:\n- Part 1: {?}\n- Part 2: {?}\n", .{
+        try stdout.print("{d}/{d:02}:\n- Part 1: {?}\n- Part 2: {?}\n", .{
+            Solver.YEAR,
+            Solver.DAY,
             try solve.part1(processed_input),
             try solve.part2(processed_input),
         });

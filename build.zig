@@ -86,6 +86,7 @@ pub fn build(b: *std.Build) !void {
         const solve_exe = b.addRunArtifact(solve);
         const solve_test_exe = b.addRunArtifact(solve_test);
         const bench_exe = b.addRunArtifact(bench);
+        bench_exe.addArg("3");
 
         const gen: *steps.GenerateContex = .init(b, aoc, yearday, src_dir);
         defer gen.deinit();

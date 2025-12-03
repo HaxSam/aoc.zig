@@ -19,11 +19,11 @@ pub const INPUT_FILE = @embedFile("input");
 ///////////////// have fun ///////////////////////
 //////////////////////////////////////////////////
 
-pub const InputType = []const u8;
-pub const Input = []InputType;
+pub const Line = []const u8;
+pub const InputType = []Line;
 
 // Advent of Parsing~
-pub fn processInput(self: *Self) !Input {
+pub fn processInput(self: *Self) !InputType {
     var allocator = self.arena.allocator();
 
     const end = std.mem.lastIndexOfScalar(u8, self.input, '\n').?;
@@ -32,7 +32,7 @@ pub fn processInput(self: *Self) !Input {
     const split_on = "\n";
     const line_count = std.mem.count(u8, self.input, split_on) + 1;
     var split = std.mem.tokenizeSequence(u8, self.input, split_on);
-    const lines = try allocator.alloc(InputType, line_count);
+    const lines = try allocator.alloc(Line, line_count);
 
     for (lines) |*l| {
         l.* = split.next().?;
@@ -42,13 +42,13 @@ pub fn processInput(self: *Self) !Input {
 }
 
 // Advent of Code (Time to solve fr)
-pub fn part1(self: *Self, input: Input) !?u128 {
+pub fn part1(self: *Self, input: InputType) !?u128 {
     _ = self.arena.allocator();
     _ = input;
     return null;
 }
 
-pub fn part2(self: *Self, input: Input) !?u128 {
+pub fn part2(self: *Self, input: InputType) !?u128 {
     _ = self.arena.allocator();
     _ = input;
     return null;
